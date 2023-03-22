@@ -72,3 +72,74 @@ module slot_machine(
         end
     end  
 endmodule
+
+/*
+    Este módulo de teste define sinais para os mesmos sinais de entrada e saída que o módulo slot_machine, e instancia
+    o módulo como um dispositivo sob teste.
+
+    Ele inicializa os sinais de entrada e gera um sinal de relógio periódico usando um gerador de relógio.
+
+    Ele também define um teste de sequência simples que inicia a máquina caça-níqueis, espera um pouco e em seguida
+    a para, esperando um pouco mais antes de verificar as saídas. Finalmente, ele imprime os valores das saídas usando a
+    função $display e encerra a simulação usando a função $finish.
+*/
+
+module slot_machine_test;
+    // Inputs
+    reg clock;
+    reg reset;
+    reg start;
+
+    // Outputs
+    wire [2:0] symbol1;
+    wire [2:0] symbol2;
+    wire [2:0] symbol3;
+    wire win;
+
+    // Instantiate the module to be tested
+    slot_machine slot_machine_under_test(
+        .clock(clock),
+        .reset(reset),
+        .start(start),
+        .symbol1(symbol1),
+        .symbol2(symbol2),
+        .symbol3(symbol3),
+        .win(win)
+    );
+
+    // Initialize inputs
+    initial begin
+        clock = 0;
+        reset = 1;
+        start = 0;
+        #5 reset = 0;
+    end
+
+    // Toggle the clock and start signals to simulate operation
+    always #10 clock = ~clock;
+    always #25 start = ~start;
+
+    // Test sequence
+    initial begin
+        // Wait for a few clock cycles after reset
+        #20;
+
+        // Start the slot machine
+        start = 1;
+
+        // Wait for a few clock cycles to allow the slot machine to generate symbols
+        #100;
+
+        // Stop the slot machine
+        start = 0;
+
+        // Wait for a few clock cycles to check the winning combination
+        #20;
+
+        // Check the output values
+        $display("symbol1 = %d, symbol2 = %d, symbol3 = %d, win = %d", symbol1, symbol2, symbol3, win);
+
+        // Stop the simulation
+        $finish;
+    end
+endmodule
